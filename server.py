@@ -1,0 +1,39 @@
+"""Servidor Flask para la detección de emociones."""
+
+from flask import Flask, request, render_template
+from EmotionDetection import emotion_detector
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    """Renderiza la página principal."""
+    return render_template('index.html')
+
+@app.route('/emotionDetector', methods=['GET', 'POST'])
+def emotion_detector_route():
+    """
+    Procesa la solicitud de detección de emociones.
+    Devuelve el resultado formateado o un mensaje de error si la entrada es inválida.
+    """
+    if request.method == 'POST':
+        text_to_analyze = request.form['textToAnalyze']
+    else:
+        text_to_analyze = request.args.get('textToAnalyze', '')
+    result = emotion_detector(text_to_analyze)
+    if result['dominant_emotion'] is None:
+        return "¡Texto inválido! ¡Por favor, intenta de nuevo!"
+    response_text = (
+        f"Para la declaración dada, la respuesta del sistema es "
+        f"'anger': {result['anger']}, "
+        f"'disgust': {result['disgust']}, "
+        f"'fear': {result['fear']}, "
+        f"'joy': {result['joy']} y "
+        f"'sadness': {result['sadness']}. "
+        f"La emoción dominante es {result['dominant_emotion']}."
+    )
+    return response_text
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+    
